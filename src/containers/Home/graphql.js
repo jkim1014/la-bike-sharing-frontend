@@ -1,5 +1,14 @@
 import gql from 'graphql-tag'
 
+export const GET_DEFICIT = gql`
+  query {
+    bike {
+      station
+      deficit
+    }
+  }
+`
+
 export const GET_TEN_START = gql`
   query {
     topTenStartStations {

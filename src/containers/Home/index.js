@@ -31,6 +31,7 @@ import {
   ButtonGroup
 } from 'reactstrap'
 import {
+  GET_DEFICIT,
   GET_TEN_START,
   GET_TEN_STOP,
   GET_TOP_ROUTES,
@@ -112,8 +113,11 @@ class Home extends Component {
               <SubTitle>Joon Kim</SubTitle>
               <GraphSub>
                 I separated out the project into two repositories. One for the
-                frontend of the project and another for the backend. Here is a
-                list of technologies I used.
+                frontend of the project and another for the backend. For all the
+                graphs visible on this page, it is interactive - zooming in,
+                highlight a portion of the graph, and hovering over graphs will
+                show you more information. Here is a list of technologies I
+                used.
               </GraphSub>
               <GraphSub>
                 Frontend-stack: React, Apollo-Client, Bootstrap, Plot.ly React
@@ -124,7 +128,12 @@ class Home extends Component {
                 <GraphTitle>Seasonal Variance</GraphTitle>
                 <GraphSub>
                   Information about the bike sharing audience between different
+                  seasons. I made the following assumptions about the four
                   seasons
+                  <GraphSub>Summer: June to August</GraphSub>
+                  <GraphSub>Fall: September to November</GraphSub>
+                  <GraphSub>Winter: December to February</GraphSub>
+                  <GraphSub>Spring: March to May</GraphSub>
                 </GraphSub>
                 <Dropdown
                   isOpen={this.state.dropdownOpen1}
@@ -168,7 +177,7 @@ class Home extends Component {
                         />
                         <Card
                           stat={data.seasonal.averageTripDuration.toFixed(2)}
-                          text="Average Trip Duration (miles)"
+                          text="Average Trip Duration (minutes)"
                         />
                         <Card2 text={data.seasonal.topThreeStations} />
                       </Row>
@@ -238,7 +247,7 @@ class Home extends Component {
                         />
                         <SmallTextCont>
                           <h4>Current Filter(s):</h4>
-                          <h4>{this.state.planDuration}</h4>
+                          <h4>{this.state.planDuration} days plan holder</h4>
                           <h4>{this.state.tripType}</h4>
                         </SmallTextCont>
                       </Row>
@@ -249,9 +258,54 @@ class Home extends Component {
               <Jumbotron>
                 <GraphTitle>Change of Bike Over Day</GraphTitle>
                 <GraphSub>
-                  How we can best displace bikes throughout the day
+                  Some stations are better served as end stations than start
+                  stations, vice versa. I first sampled a week's worth of data.
+                  Since the data is so large, and though we do know that
+                  seasonal difference do make a change in the number of bike
+                  rides, I assume that the pattern for stations serving as
+                  better start stations or end stations should stay the same.
+                  For each station visited in that week, if a bike left from the
+                  station as a start, then I subtract one from its counter
+                  value. It the station serves as an end station, then I add one
+                  to its counter value. In the end, if the station is at a
+                  deficit, we know that it is a better start station. Then we
+                  will use the data we have gotten from the last part of this
+                  web app - peaks and troughs of ridership by hours - to see
+                  when and to where bikes should be moved. We will ignore round
+                  trips since it gives us no information.
                 </GraphSub>
                 <hr />
+                <Query query={GET_DEFICIT} fetchPolicy="cache-and-network">
+                  {({ loading, error, data }) => {
+                    if (loading) return <p>Loading</p>
+                    if (error) return <p>{error}</p>
+                    const x = data.bike.map(deficit => `ID${deficit.station}`)
+                    const y = data.bike.map(deficit => deficit.deficit)
+                    return (
+                      <Wrapper>
+                        <Plot
+                          data={[
+                            { type: 'bar', x, y, marker: { color: '#007bff' } }
+                          ]}
+                          layout={{
+                            width: '40%',
+                            height: '40vw',
+                            title: 'Deficit of Stations Over a Week'
+                          }}
+                        />
+                      </Wrapper>
+                    )
+                  }}
+                </Query>
+                <GraphSub>
+                  I claim that the stations with the lowest value should have
+                  bikes delivered while the stations with the highest value
+                  should have bikes taked away from. To answer when the bikes
+                  should be moved, refer to the bottom of this site where I
+                  outline the hours with peaks and troughs. Right before peaks,
+                  stations with lower values should be supplied with more bikes
+                  so that they can effectively serve as starting stations.
+                </GraphSub>
               </Jumbotron>
               <Graph>
                 <GraphTitle>Most Popular Start/Stop Station</GraphTitle>
@@ -315,14 +369,14 @@ class Home extends Component {
                 <GraphSub>
                   The average distance travelled for a round trip is greater
                   than twice that of a one way trip. The values were calculated
-                  this way. For a one way trip, we are given the longitude and
-                  the latitude of the start and end stations (excluding trivial
-                  NULL cases). We use manhattan distance rather than euclidian
+                  this way. For a one way trip, I am given the longitude and the
+                  latitude of the start and end stations (excluding trivial NULL
+                  cases). I used manhattan distance rather than euclidian
                   distance since it is more realistic that bikes will travel
                   along the grid system rather than cutting through the road. We
                   use the haversine calculations to get the correct distances.
                   For a round trip, since we do not know the coordinates for the
-                  start and end stations, we use the duration of the trip as
+                  start and end stations, I used the duration of the trip as
                   well as an educated assumption about the average speed of the
                   bicycle. An article relased by the MIT tech review had
                   revealed a reasonable estimate of approximately 6 mph rate for
@@ -335,9 +389,9 @@ class Home extends Component {
                   adjustable for each plan holder; either walk on, monthly, or
                   yearly. Suprisingly, those who walk on spend more time on
                   average on the bike rather than those who own a pass. This can
-                  be due to a few reasons. First, we know that there is some max
+                  be due to a few reasons. First, I know that there is some max
                   duration in the dataset that no trip can go past. The reason
-                  for why some walk-on bikers were charged for the max duration
+                  for why some walk-on bikers were recorded for the max duration
                   is unclear.
                 </GraphSub>
                 <Row>
@@ -445,14 +499,14 @@ class Home extends Component {
                 <GraphSub>
                   The most common routes taken by bike sharing service users are
                   the following represented in the graph. The number was found
-                  by taking the ten most common point A to point B trips. We
-                  notice that the route between station 3030 and 3014 is very
-                  popular; in fact, the first top two most common routes both
-                  involve those two stations. This makes sense since station
-                  3014 is the nearest station to the train station, union
-                  station. As commuters avoiding using personal vehicles to
-                  work, biking from a reasonable bike station to the train
-                  station allows for a quick and car-less commute.
+                  by taking the ten most common point A to point B trips. Note
+                  that the route between station 3030 and 3014 is very popular;
+                  in fact, the first top two most common routes both involve
+                  those two stations. This makes sense since station 3014 is the
+                  nearest station to the train station, union station. As
+                  commuters avoiding using personal vehicles to work, biking
+                  from a reasonable bike station to the train station allows for
+                  a quick and car-less commute.
                 </GraphSub>
                 <Query query={GET_TOP_ROUTES} fetchPolicy="cache-and-network">
                   {({ loading, error, data }) => {
@@ -515,6 +569,7 @@ class Home extends Component {
                   {({ loading, error, data }) => {
                     if (loading) return <p>Loading</p>
                     if (error) return <p>{error}</p>
+                    console.log(data)
                     const x = data.peakHours.map(hour => `HR${hour.hour}`)
                     const y = data.peakHours.map(hour => hour.frequency)
                     return (
