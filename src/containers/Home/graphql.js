@@ -40,6 +40,25 @@ export const GET_REG = gql`
   }
 `
 
+export const GET_PEAK_HOURS = gql`
+  query {
+    peakHours {
+      hour
+      frequency
+    }
+  }
+`
+
+export const GET_TOP_ROUTES = gql`
+  query {
+    topTenRoutes {
+      startStationId
+      endStationId
+      frequency
+    }
+  }
+`
+
 export const GET_BREAK_DOWN = gql`
   query breakDown($input: BreakDownInput!) {
     breakDown(input: $input) {
