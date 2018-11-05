@@ -24,21 +24,12 @@
   "devDependencies": {
     "@babel/cli": "^7.1.2",
     "@babel/preset-env": "^7.1.0",
-    "babel-eslint": "^8.2.3",
     "babel-plugin-lodash": "^3.3.4",
-    "eslint": "^4.19.1",
-    "eslint-config-airbnb": "^16.1.0",
-    "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-import": "^2.11.0",
-    "eslint-plugin-jsx-a11y": "^6.0.3",
-    "eslint-plugin-prettier": "^2.6.0",
-    "eslint-plugin-react": "^7.7.0",
     "prettier": "^1.13.5"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "lint": "eslint \"src/**/*.js\"",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }
