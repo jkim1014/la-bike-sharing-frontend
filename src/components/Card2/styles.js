@@ -14,12 +14,6 @@ export const Container = styled(Flex)`
   margin-top: 50px;
 `
 
-export const Statistic = styled(Flex)`
-  font-size: 40px;
-  text-align: center;
-  color: #f70;
-`
-
 export const Text = styled(Flex)`
   font-size: 18px;
   text-align: center;
